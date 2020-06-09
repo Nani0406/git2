@@ -2,15 +2,34 @@ pipeline {
    agent any
 
    stages {
-      stage('Hello') {
+      stage('Git Checkout') {
          steps {
-            echo 'Hello World'
+            git 'https://github.com/Nani0406/mvn_sonar.git'
          }
       }
       stage('Build') {
+        steps {
+            withSonarQubeEnv('sonar') {
+                sh '/opt/maven/bin/mvn clean verify sonar:sonar -Dmaven.test.skip=true'
+            }
+        }
+      }
+      stage('Quality Gate') {
+          steps {
+              timeout(time: 1, unit: 'MINUTES') {
+                      waitForQualityGate abortPipeline: true
+              }
+          }
+      }
+      stage('Deploy') {
          steps {
-            echo 'Build Successful'
+            sh '/opt/maven/lib/mvn clean deploy'
          }
       }
-   }
+      stage('Release') {
+         steps {
+            sh 'export JENKINS_NODE_COOKIE=dontKillMe'
+         }
+      }
+  }
 }
