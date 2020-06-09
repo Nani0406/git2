@@ -23,7 +23,7 @@ pipeline {
       }
       stage('Deploy') {
          steps {
-            sh '/opt/maven/lib/mvn clean install'
+            sh '/opt/maven/bin/mvn clean install'
          }
       }
       stage('Release') {
